@@ -26,9 +26,10 @@ import { ScreenshotScannerPage } from '@/components/detector/screenshot-scanner-
 import { MoreOptionsPage } from '@/components/options/more-options-page';
 import { CallScannerPage } from '@/components/detector/call-scanner-page';
 import { ExtensionPage } from '@/components/extension/extension-page';
+import { LeakScannerPage } from '@/components/detector/leak-scanner-page';
 
 type ScanStatus = 'idle' | 'scanning' | 'success' | 'error';
-type View = 'home' | 'detector' | 'community' | 'about' | 'admin' | 'admin-login' | 'more-options' | 'screenshot' | 'call-scanner' | 'extension';
+type View = 'home' | 'detector' | 'community' | 'about' | 'admin' | 'admin-login' | 'more-options' | 'screenshot' | 'call-scanner' | 'extension' | 'leaked-db';
 
 export default function Home() {
   const [status, setStatus] = useState<ScanStatus>('idle');
@@ -110,6 +111,8 @@ export default function Home() {
         return <ScreenshotScannerPage />;
       case 'call-scanner':
         return <CallScannerPage />;
+      case 'leaked-db':
+        return <LeakScannerPage />;
       case 'extension':
         return <ExtensionPage />;
       case 'community':

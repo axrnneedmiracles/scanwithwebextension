@@ -47,6 +47,21 @@ export type CallAnalysisResult = {
     error?: string;
 };
 
+export type LeakedDBResult = {
+    email: string;
+    isFound: boolean;
+    breachCount: number;
+    breaches: Array<{
+        name: string;
+        date: string;
+        dataTypes: string[];
+        description: string;
+    }>;
+    riskLevel: 'Low' | 'Medium' | 'High' | 'Critical';
+    recommendations: string;
+    analyzedAt: string;
+};
+
 export type ScanHistoryItem = ScanResult & {
     id: string;
     scannedAt: string;
