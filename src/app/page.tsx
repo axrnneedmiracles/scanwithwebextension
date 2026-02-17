@@ -24,9 +24,10 @@ import AdminLogin from './admin/login/page';
 import { useAdmin } from '@/context/admin-context';
 import { incrementScanCount, incrementVisitorCount } from '@/lib/firebase-actions';
 import { GoProPage } from '@/components/pro/go-pro-page';
+import { ScreenshotScannerPage } from '@/components/detector/screenshot-scanner-page';
 
 type ScanStatus = 'idle' | 'scanning' | 'success' | 'error';
-type View = 'home' | 'detector' | 'community' | 'about' | 'admin' | 'admin-login' | 'pro';
+type View = 'home' | 'detector' | 'community' | 'about' | 'admin' | 'admin-login' | 'pro' | 'screenshot';
 
 export default function Home() {
   const [status, setStatus] = useState<ScanStatus>('idle');
@@ -104,6 +105,8 @@ export default function Home() {
     switch (currentView) {
       case 'detector':
         return <ImageDetectorPage />;
+      case 'screenshot':
+        return <ScreenshotScannerPage />;
       case 'community':
         return <CommunityPage prefilledReport={prefilledReport} onFormSubmit={() => setPrefilledReport(null)} />;
       case 'about':

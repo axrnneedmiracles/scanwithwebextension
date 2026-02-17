@@ -23,6 +23,18 @@ export type ImageAnalysisResult = {
     analyzedAt: string;
 };
 
+export type ScreenshotAnalysisResult = {
+    id: string;
+    imageUrl: string;
+    isScam: boolean;
+    riskScore: number;
+    explanation: string;
+    extractedText: string;
+    recommendedActions: string;
+    analyzedAt: string;
+    error?: string;
+};
+
 export type ScanHistoryItem = ScanResult & {
     id: string;
     scannedAt: string;

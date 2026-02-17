@@ -24,11 +24,11 @@ const cardData = [
     label: 'Community'
   },
   {
-    id: 'about',
+    id: 'screenshot',
     color: '#060010',
-    title: 'About Sentinel',
-    description: 'Learn more about the project and its creator.',
-    label: 'About'
+    title: 'Screenshot Scanner',
+    description: 'Upload screenshots of suspicious messages to detect scams and fraud.',
+    label: 'Scan Message'
   },
   {
     id: 'pro',
@@ -492,7 +492,7 @@ const useMobileDetection = () => {
   return isMobile;
 };
 
-type View = 'home' | 'detector' | 'community' | 'about' | 'pro';
+type View = 'home' | 'detector' | 'community' | 'about' | 'pro' | 'screenshot';
 
 interface MagicBentoProps {
     textAutoHide?: boolean;
