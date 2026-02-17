@@ -31,11 +31,11 @@ const cardData = [
     label: 'Scan Message'
   },
   {
-    id: 'pro',
+    id: 'more-options',
     color: '#060010',
-    title: 'Go Pro',
-    description: 'Unlock advanced features with Sentinel Pro.',
-    label: 'Premium'
+    title: 'More Security Tools',
+    description: 'Web extensions, on-call protection, and leaked email scans.',
+    label: 'More Options'
   }
 ];
 
@@ -492,7 +492,7 @@ const useMobileDetection = () => {
   return isMobile;
 };
 
-type View = 'home' | 'detector' | 'community' | 'about' | 'pro' | 'screenshot';
+type View = 'home' | 'detector' | 'community' | 'about' | 'admin' | 'admin-login' | 'more-options' | 'screenshot';
 
 interface MagicBentoProps {
     textAutoHide?: boolean;
