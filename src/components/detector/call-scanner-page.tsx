@@ -121,7 +121,7 @@ export function CallScannerPage() {
                              <p className="text-sm text-muted-foreground">Click below to start listening. Keep it under 60 seconds.</p>
                         )}
                         
-                        <div className="flex gap-4">
+                        <div className="flex justify-center gap-4">
                             {!isRecording ? (
                                 <Button onClick={startRecording} disabled={analyzing} className="h-14 px-8 text-lg cursor-target">
                                     <Mic className="mr-2 h-5 w-5" />
@@ -130,7 +130,7 @@ export function CallScannerPage() {
                             ) : (
                                 <Button onClick={stopRecording} variant="destructive" className="h-14 px-8 text-lg cursor-target">
                                     <Square className="mr-2 h-5 w-5" />
-                                    Stop & Analyze
+                                    Stop &amp; Analyze
                                 </Button>
                             )}
                         </div>
