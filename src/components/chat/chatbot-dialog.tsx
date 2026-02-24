@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Bot, Send, X, User, Loader2, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Bot, Send, X, User, Loader2, ShieldAlert, Phone, Landmark, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -19,9 +19,16 @@ interface ChatBotDialogProps {
   onClose: () => void;
 }
 
+const QUICK_OPTIONS = [
+  { id: 'scammed', label: "I've been scammed", icon: <ShieldAlert className="w-3 h-3" /> },
+  { id: 'bank', label: "Bank Support", icon: <Landmark className="w-3 h-3" /> },
+  { id: 'report', label: "Report to Cybercrime", icon: <Phone className="w-3 h-3" /> },
+  { id: 'tips', label: "Security Tips", icon: <HelpCircle className="w-3 h-3" /> },
+];
+
 export function ChatBotDialog({ open, onClose }: ChatBotDialogProps) {
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'bot', content: 'Hello! I am Nayra, your Sentinel Assistant. I am here to help you secure your digital life. Have you encountered a threat or been scammed? Tell me what happened.' },
+    { role: 'bot', content: 'Hello! I am Nayra, your Sentinel Assistant. I specialize in forensic scam recovery. How can I protect you today? Select an option below or tell me what happened.' },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -32,14 +39,12 @@ export function ChatBotDialog({ open, onClose }: ChatBotDialogProps) {
     if (scrollRef.current) {
       scrollRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages]);
+  }, [messages, loading]);
 
-  const handleSend = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || loading) return;
+  const sendMessage = async (text: string) => {
+    if (!text.trim() || loading) return;
 
-    const userMessageText = input.trim();
-    const newMessages = [...messages, { role: 'user', content: userMessageText } as Message];
+    const newMessages = [...messages, { role: 'user', content: text } as Message];
     setMessages(newMessages);
     setInput('');
     setLoading(true);
@@ -51,8 +56,8 @@ export function ChatBotDialog({ open, onClose }: ChatBotDialogProps) {
       }));
 
       const response = await nayraChat({
-        message: userMessageText,
-        history: history.slice(0, -1) // Send history excluding the latest user message
+        message: text,
+        history: history.slice(0, -1)
       });
 
       setMessages(prev => [...prev, { role: 'bot', content: response.reply }]);
@@ -60,33 +65,35 @@ export function ChatBotDialog({ open, onClose }: ChatBotDialogProps) {
       toast({
         variant: 'destructive',
         title: 'Nayra is offline',
-        description: 'Connection error. Please try again later.'
+        description: 'Forensic connection lost. Please retry.'
       });
     } finally {
       setLoading(false);
     }
   };
 
+  const handleSend = (e: React.FormEvent) => {
+    e.preventDefault();
+    sendMessage(input);
+  };
+
   if (!open) return null;
 
   return (
-    <div className="fixed bottom-24 right-8 z-[100] w-[90vw] md:w-[450px] animate-in slide-in-from-bottom-10 fade-in duration-300">
-      <Card className="bg-card/95 backdrop-blur-2xl border-primary/40 shadow-[0_0_50px_rgba(103,58,183,0.3)] flex flex-col h-[600px]">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 border-b border-primary/20 bg-primary/20 rounded-t-lg">
+    <div className="fixed bottom-28 right-8 z-[100] w-[90vw] md:w-[450px] animate-in slide-in-from-bottom-10 fade-in duration-300">
+      <Card className="bg-card/95 backdrop-blur-2xl border-primary/40 shadow-[0_0_50px_rgba(103,58,183,0.3)] flex flex-col h-[600px] rounded-3xl overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 border-b border-primary/20 bg-primary/20">
           <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="absolute inset-0 bg-primary/30 rounded-full animate-ping" />
-              <div className="relative p-2 bg-primary rounded-full">
-                <Bot className="w-5 h-5 text-primary-foreground" />
-              </div>
+            <div className="relative p-2 bg-primary rounded-xl">
+              <Bot className="w-5 h-5 text-primary-foreground" />
             </div>
             <div>
               <CardTitle className="text-sm font-black tracking-widest uppercase">
-                NAYRA AI
+                NAYRA FORENSIC
               </CardTitle>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter">Security Expert Online</span>
+                <span className="text-[10px] text-muted-foreground font-bold uppercase">Ready to Assist</span>
               </div>
             </div>
           </div>
@@ -100,12 +107,12 @@ export function ChatBotDialog({ open, onClose }: ChatBotDialogProps) {
             <div className="space-y-4">
               {messages.map((m, i) => (
                 <div key={i} className={`flex gap-3 ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                  <div className={`p-2 rounded-full h-8 w-8 shrink-0 flex items-center justify-center ${m.role === 'bot' ? 'bg-primary/20 text-primary' : 'bg-accent/20 text-accent'}`}>
+                  <div className={`p-2 rounded-lg h-8 w-8 shrink-0 flex items-center justify-center ${m.role === 'bot' ? 'bg-primary/20 text-primary' : 'bg-accent/20 text-accent'}`}>
                     {m.role === 'bot' ? <Bot className="w-4 h-4" /> : <User className="w-4 h-4" />}
                   </div>
                   <div className={`p-3 rounded-2xl text-sm leading-relaxed shadow-sm whitespace-pre-wrap max-w-[85%] ${
                     m.role === 'bot' 
-                      ? 'bg-muted/50 rounded-tl-none border border-border/30' 
+                      ? 'bg-muted/50 rounded-tl-none border border-border/30 text-foreground' 
                       : 'bg-primary text-primary-foreground rounded-tr-none'
                   }`}>
                     {m.content}
@@ -113,12 +120,12 @@ export function ChatBotDialog({ open, onClose }: ChatBotDialogProps) {
                 </div>
               ))}
               {loading && (
-                <div className="flex gap-3 animate-pulse">
-                  <div className="p-2 rounded-full h-8 w-8 bg-primary/20 flex items-center justify-center">
+                <div className="flex gap-3">
+                  <div className="p-2 rounded-lg h-8 w-8 bg-primary/20 flex items-center justify-center">
                     <Loader2 className="w-4 h-4 text-primary animate-spin" />
                   </div>
-                  <div className="p-3 rounded-2xl bg-muted/30 rounded-tl-none italic text-xs text-muted-foreground flex items-center gap-2">
-                    Nayra is analyzing forensics...
+                  <div className="p-3 rounded-2xl bg-muted/30 rounded-tl-none italic text-xs text-muted-foreground">
+                    Analyzing forensic data...
                   </div>
                 </div>
               )}
@@ -127,16 +134,33 @@ export function ChatBotDialog({ open, onClose }: ChatBotDialogProps) {
           </ScrollArea>
         </CardContent>
 
-        <CardFooter className="p-4 border-t border-primary/10 bg-muted/10">
+        <CardFooter className="flex flex-col p-4 border-t border-primary/10 bg-muted/5 gap-4">
+          {/* Option Buttons */}
+          <div className="flex flex-wrap gap-2 w-full">
+            {QUICK_OPTIONS.map((opt) => (
+              <Button 
+                key={opt.id} 
+                variant="outline" 
+                size="sm" 
+                onClick={() => sendMessage(opt.label)}
+                disabled={loading}
+                className="h-8 text-[11px] rounded-full border-primary/20 bg-background/50 hover:bg-primary/10 hover:border-primary/40 cursor-target flex items-center gap-1.5"
+              >
+                {opt.icon}
+                {opt.label}
+              </Button>
+            ))}
+          </div>
+
           <form onSubmit={handleSend} className="flex w-full gap-2">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Tell Nayra what happened..."
-              className="bg-background/80 h-12 text-sm focus-visible:ring-primary border-primary/20"
+              placeholder="Type your message..."
+              className="bg-background/80 h-11 text-sm border-primary/20 rounded-xl"
               disabled={loading}
             />
-            <Button type="submit" size="icon" className="h-12 w-12 shrink-0 bg-primary shadow-lg shadow-primary/20" disabled={loading || !input.trim()}>
+            <Button type="submit" size="icon" className="h-11 w-11 shrink-0 bg-primary rounded-xl" disabled={loading || !input.trim()}>
               <Send className="h-5 w-5" />
             </Button>
           </form>

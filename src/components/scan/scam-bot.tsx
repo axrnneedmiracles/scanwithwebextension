@@ -1,31 +1,30 @@
 'use client';
 
 import { useState } from 'react';
+import { Bot, Sparkles } from 'lucide-react';
 import { ChatBotDialog } from '../chat/chatbot-dialog';
+import { Button } from '../ui/button';
 
 export function ScamBot() {
   const [chatOpen, setChatOpen] = useState(false);
 
   return (
     <>
-      <div className="fixed bottom-4 right-4 z-[90] flex flex-col items-center pointer-events-none">
-        {/* Robot Container - Reduced size slightly as requested */}
-        <div className="relative w-56 h-56 md:w-72 md:h-72 overflow-hidden pointer-events-auto flex items-center justify-center rounded-3xl group">
-          {/* @ts-ignore */}
-          <spline-viewer 
-            url="https://prod.spline.design/rYPxO8ZKJCM6ipWR/scene.splinecode"
-            className="w-full h-full"
-            loading-anim-type="spinner-small-dark"
-          ></spline-viewer>
+      <div className="fixed bottom-8 right-8 z-[90]">
+        <Button 
+          onClick={() => setChatOpen(true)}
+          className="group relative h-16 px-6 bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-widest rounded-2xl shadow-[0_0_30px_rgba(132,0,255,0.4)] border-2 border-white/20 transition-all hover:scale-105 active:scale-95 cursor-target flex items-center gap-3"
+        >
+          <div className="relative">
+            <div className="absolute inset-0 bg-white/20 rounded-full animate-ping group-hover:animate-none" />
+            <Bot className="w-6 h-6 relative z-10" />
+          </div>
+          <span className="text-lg">ASK NAYRA</span>
+          <Sparkles className="w-4 h-4 text-accent animate-pulse" />
           
-          {/* ASK NAYRA Button - Positioned further right to completely cover the Spline watermark */}
-          <button 
-            onClick={() => setChatOpen(true)}
-            className="absolute bottom-2 right-1 px-5 py-2 bg-primary text-primary-foreground text-sm font-black uppercase tracking-widest rounded-lg shadow-[0_0_25px_rgba(132,0,255,0.7)] border-2 border-white/20 hover:scale-105 active:scale-95 transition-all z-[100] cursor-target whitespace-nowrap backdrop-blur-md hover:bg-primary/90"
-          >
-            ASK NAYRA
-          </button>
-        </div>
+          {/* Subtle Glow */}
+          <div className="absolute -inset-1 bg-primary/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+        </Button>
       </div>
 
       <ChatBotDialog open={chatOpen} onClose={() => setChatOpen(false)} />
