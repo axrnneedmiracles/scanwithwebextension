@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { ScanResult } from '@/lib/types';
@@ -8,6 +7,7 @@ import { RiskMeter } from './risk-meter';
 import { ShieldAlert, ShieldCheck, Info, AlertTriangle, LifeBuoy, Users } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Button } from '../ui/button';
+import { ScamBot } from './scam-bot';
 
 interface ScanResultProps {
   result: ScanResult | null;
@@ -47,38 +47,43 @@ export function ScanResultDisplay({ result, status, onWarnCommunity }: ScanResul
 
   if (result.isMalicious) {
     return (
-      <ResultCard className="border-destructive">
-        <CardHeader className="text-center items-center">
-          <ShieldAlert className="w-16 h-16 text-destructive" />
-          <CardTitle className="text-3xl font-bold text-destructive">Threat Detected</CardTitle>
-          <CardDescription className="text-destructive/80 text-base">This link is potentially harmful.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <RiskMeter score={result.riskScore} />
-          <Accordion type="single" collapsible defaultValue="item-1" className="w-full">
-            <AccordionItem value="item-1">
-              <AccordionTrigger className="text-lg font-semibold"><Info className="mr-2 text-primary" />Analysis</AccordionTrigger>
-              <AccordionContent className="text-base text-muted-foreground">{result.explanation}</AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="item-2">
-              <AccordionTrigger className="text-lg font-semibold"><AlertTriangle className="mr-2 text-destructive" />What To Do</AccordionTrigger>
-              <AccordionContent className="text-base text-muted-foreground">{result.recommendedActions}</AccordionContent>
-            </AccordionItem>
-            {result.advice && (
-               <AccordionItem value="item-3">
-                <AccordionTrigger className="text-lg font-semibold"><LifeBuoy className="mr-2 text-accent" />Clicked Already?</AccordionTrigger>
-                <AccordionContent className="text-base text-muted-foreground">{result.advice}</AccordionContent>
+      <>
+        <ResultCard className="border-destructive">
+          <CardHeader className="text-center items-center">
+            <ShieldAlert className="w-16 h-16 text-destructive" />
+            <CardTitle className="text-3xl font-bold text-destructive">Threat Detected</CardTitle>
+            <CardDescription className="text-destructive/80 text-base">This link is potentially harmful.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <RiskMeter score={result.riskScore} />
+            <Accordion type="single" collapsible defaultValue="item-1" className="w-full">
+              <AccordionItem value="item-1">
+                <AccordionTrigger className="text-lg font-semibold"><Info className="mr-2 text-primary" />Analysis</AccordionTrigger>
+                <AccordionContent className="text-base text-muted-foreground">{result.explanation}</AccordionContent>
               </AccordionItem>
-            )}
-          </Accordion>
-        </CardContent>
-        <CardFooter>
-          <Button onClick={onWarnCommunity} className="w-full cursor-target" variant="secondary">
-            <Users className="mr-2 h-4 w-4" />
-            Warn others in community
-          </Button>
-        </CardFooter>
-      </ResultCard>
+              <AccordionItem value="item-2">
+                <AccordionTrigger className="text-lg font-semibold"><AlertTriangle className="mr-2 text-destructive" />What To Do</AccordionTrigger>
+                <AccordionContent className="text-base text-muted-foreground">{result.recommendedActions}</AccordionContent>
+              </AccordionItem>
+              {result.advice && (
+                 <AccordionItem value="item-3">
+                  <AccordionTrigger className="text-lg font-semibold"><LifeBuoy className="mr-2 text-accent" />Clicked Already?</AccordionTrigger>
+                  <AccordionContent className="text-base text-muted-foreground">{result.advice}</AccordionContent>
+                </AccordionItem>
+              )}
+            </Accordion>
+          </CardContent>
+          <CardFooter>
+            <Button onClick={onWarnCommunity} className="w-full cursor-target" variant="secondary">
+              <Users className="mr-2 h-4 w-4" />
+              Warn others in community
+            </Button>
+          </CardFooter>
+        </ResultCard>
+        
+        {/* Scam Assistant Bot with Chatbot trigger */}
+        <ScamBot />
+      </>
     );
   }
 
