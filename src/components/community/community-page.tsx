@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -30,8 +29,10 @@ interface CommunityPageProps {
 const ReportTime = ({ time }: { time: any }) => {
   const [formattedTime, setFormattedTime] = useState('');
   useEffect(() => {
-    if (time) {
+    if (time && typeof time.toDate === 'function') {
       setFormattedTime(formatDistanceToNow(new Date(time.toDate()), { addSuffix: true }));
+    } else if (time instanceof Date) {
+        setFormattedTime(formatDistanceToNow(time, { addSuffix: true }));
     } else {
       setFormattedTime('Just now');
     }

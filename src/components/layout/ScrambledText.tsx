@@ -1,11 +1,6 @@
 'use client';
 
-import { useEffect, useRef, CSSProperties, ReactNode } from 'react';
-import { gsap } from 'gsap';
-import { SplitText } from 'gsap/SplitText.js';
-import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin.js';
-
-gsap.registerPlugin(SplitText, ScrambleTextPlugin);
+import { useEffect, useRef, useState, CSSProperties, ReactNode } from 'react';
 
 interface ScrambledTextProps {
   radius?: number;
@@ -21,71 +16,60 @@ const ScrambledText = ({
   radius = 100,
   duration = 1.2,
   speed = 0.5,
-  scrambleChars = '.:',
+  scrambleChars = '!#@$%&*()_+-=[]{}|;:,.<>?',
   className = '',
   style = {},
   children
 }: ScrambledTextProps) => {
-  const rootRef = useRef<HTMLDivElement>(null);
+  const [displayText, setDisplayText] = useState<string>(children?.toString() || '');
+  const originalText = children?.toString() || '';
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const scramble = () => {
+    let iteration = 0;
+    if (intervalRef.current) clearInterval(intervalRef.current);
+
+    intervalRef.current = setInterval(() => {
+      setDisplayText(prev => 
+        originalText
+          .split("")
+          .map((char, index) => {
+            if (index < iteration) {
+              return originalText[index];
+            }
+            return scrambleChars[Math.floor(Math.random() * scrambleChars.length)];
+          })
+          .join("")
+      );
+
+      if (iteration >= originalText.length) {
+        if (intervalRef.current) clearInterval(intervalRef.current);
+      }
+
+      iteration += 1 / speed;
+    }, 30);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    // Only trigger if we aren't already scrambling
+    if (!intervalRef.current) {
+        scramble();
+    }
+  };
 
   useEffect(() => {
-    if (!rootRef.current) return;
-
-    // We need to query for the <p> tag within the component
-    const pTag = rootRef.current.querySelector('p');
-    if (!pTag) return;
-
-    const split = SplitText.create(pTag, {
-      type: 'chars',
-      charsClass: 'inline-block will-change-transform'
-    });
-
-    split.chars.forEach(el => {
-      const c = el;
-      gsap.set(c, { attr: { 'data-content': c.innerHTML } });
-    });
-
-    const handleMove = (e: PointerEvent) => {
-      split.chars.forEach(el => {
-        const c = el;
-        const { left, top, width, height } = c.getBoundingClientRect();
-        const dx = e.clientX - (left + width / 2);
-        const dy = e.clientY - (top + height / 2);
-        const dist = Math.hypot(dx, dy);
-
-        if (dist < radius) {
-          gsap.to(c, {
-            overwrite: true,
-            duration: duration * (1 - dist / radius),
-            scrambleText: {
-              text: c.dataset.content || '',
-              chars: scrambleChars,
-              speed
-            },
-            ease: 'none'
-          });
-        }
-      });
-    };
-
-    const el = rootRef.current;
-    el.addEventListener('pointermove', handleMove);
-
     return () => {
-      el.removeEventListener('pointermove', handleMove);
-      if (split.revert) {
-          split.revert();
-      }
+        if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [radius, duration, speed, scrambleChars, children]);
+  }, []);
 
   return (
     <div
-      ref={rootRef}
       className={className}
       style={style}
+      onPointerMove={handlePointerMove}
     >
-      <p>{children}</p>
+      <p>{displayText}</p>
     </div>
   );
 };

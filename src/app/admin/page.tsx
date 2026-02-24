@@ -1,11 +1,9 @@
-
 'use client';
 
 import { useCommunity } from '@/context/community-context';
 import { Shield, Trash2, LogOut, MessageCircleWarning, Star, Users, ScanSearch, CheckCircle2, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useAdmin } from '@/context/admin-context';
 import { formatDistanceToNow } from 'date-fns';
 import {
@@ -26,8 +24,10 @@ import { Badge } from '@/components/ui/badge';
 const ReportTime = ({ time }: { time: any }) => {
   const [formattedTime, setFormattedTime] = useState('');
   useEffect(() => {
-    if (time) {
+    if (time && typeof time.toDate === 'function') {
       setFormattedTime(formatDistanceToNow(new Date(time.toDate()), { addSuffix: true }));
+    } else if (time instanceof Date) {
+        setFormattedTime(formatDistanceToNow(time, { addSuffix: true }));
     } else {
       setFormattedTime('Just now');
     }
