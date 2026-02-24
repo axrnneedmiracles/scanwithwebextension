@@ -19,7 +19,7 @@ interface ChatBotDialogProps {
 
 export function ChatBotDialog({ open, onClose }: ChatBotDialogProps) {
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'bot', content: 'Hello! I am Sentinel Assistant. I see you encountered a threat. How can I help you secure your digital life today?' },
+    { role: 'bot', content: 'Hello! I am Nayra, your Sentinel Assistant. I see you encountered a threat. How can I help you secure your digital life today?' },
   ]);
   const [input, setInput] = useState('');
 
@@ -48,7 +48,7 @@ export function ChatBotDialog({ open, onClose }: ChatBotDialogProps) {
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b border-primary/20 bg-primary/10">
           <CardTitle className="text-sm font-bold flex items-center gap-2">
             <Bot className="w-5 h-5 text-primary" />
-            Sentinel AI Assistant
+            NAYRA Assistant
           </CardTitle>
           <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 rounded-full">
             <X className="h-4 w-4" />
