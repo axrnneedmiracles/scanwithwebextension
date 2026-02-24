@@ -9,3 +9,4 @@ import '@/ai/flows/image-analysis-flow.ts';
 import '@/ai/flows/screenshot-analysis.ts';
 import '@/ai/flows/call-analysis.ts';
 import '@/ai/flows/leaked-db-scan.ts';
+import '@/ai/flows/nayra-chat-flow.ts';
