@@ -30,6 +30,7 @@ const QUICK_OPTIONS = [
  * Helper to parse text and turn URLs into clickable <a> tags.
  */
 function formatMessageContent(content: string) {
+  // Enhanced regex to match common URL patterns
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const parts = content.split(urlRegex);
 
@@ -38,10 +39,10 @@ function formatMessageContent(content: string) {
       return (
         <a
           key={i}
-          href={part}
+          href={part.replace(/[.,!?;:]$/, '')} // Strip trailing punctuation from URL
           target="_blank"
           rel="noopener noreferrer"
-          className="text-accent hover:underline break-all font-bold"
+          className="text-accent hover:underline break-all font-bold underline"
         >
           {part}
         </a>
@@ -53,7 +54,7 @@ function formatMessageContent(content: string) {
 
 export function ChatBotDialog({ open, onClose }: ChatBotDialogProps) {
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'bot', content: "Hello! I am Nayra, your Sentinel Forensic Assistant. If you've encountered a scam, I'm here to help you recover.\n\nWhat happened? Please tell me which bank was involved and the approximate amount lost." },
+    { role: 'bot', content: "Hello! I am Nayra, your Sentinel Forensic Assistant. If you've encountered a scam, I'm here to help you recover.\n\nHow can I help you today?" },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
