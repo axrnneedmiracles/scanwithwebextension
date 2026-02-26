@@ -27,7 +27,7 @@ export default function RootLayout({
       <body className="font-body antialiased">
         <Script 
           type="module" 
-          src="https://unpkg.com/@splinetool/viewer@1.12.60/build/spline-viewer.js" 
+          src="https://unpkg.com/@splinetool/viewer@1.12.61/build/spline-viewer.js" 
           strategy="afterInteractive"
         />
         <FirebaseClientProvider>
