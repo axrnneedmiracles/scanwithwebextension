@@ -26,9 +26,34 @@ const QUICK_OPTIONS = [
   { id: 'tips', label: "Security Tips", icon: <HelpCircle className="w-3 h-3" /> },
 ];
 
+/**
+ * Helper to parse text and turn URLs into clickable <a> tags.
+ */
+function formatMessageContent(content: string) {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = content.split(urlRegex);
+
+  return parts.map((part, i) => {
+    if (part.match(urlRegex)) {
+      return (
+        <a
+          key={i}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-accent hover:underline break-all font-bold"
+        >
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+}
+
 export function ChatBotDialog({ open, onClose }: ChatBotDialogProps) {
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'bot', content: "Hello! I am Nayra, your Sentinel Forensic Assistant. If you've encountered a scam, I'm here to help you recover. \n\nWhat happened? Please tell me which bank was involved and the approximate amount if any was lost." },
+    { role: 'bot', content: "Hello! I am Nayra, your Sentinel Forensic Assistant. If you've encountered a scam, I'm here to help you recover.\n\nWhat happened? Please tell me which bank was involved and the approximate amount lost." },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -115,7 +140,7 @@ export function ChatBotDialog({ open, onClose }: ChatBotDialogProps) {
                       ? 'bg-muted/50 rounded-tl-none border border-border/30 text-foreground' 
                       : 'bg-primary text-primary-foreground rounded-tr-none'
                   }`}>
-                    {m.content}
+                    {formatMessageContent(m.content)}
                   </div>
                 </div>
               ))}
