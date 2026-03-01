@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useState } from 'react';
-import { Camera, ShieldAlert, ShieldCheck, Loader2, FileText, AlertTriangle } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Camera, ShieldAlert, ShieldCheck, Loader2, FileText, AlertTriangle, Clipboard } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 import { Button } from '../ui/button';
 import { Progress } from '../ui/progress';
@@ -18,33 +18,65 @@ export function ScreenshotScannerPage() {
   const [result, setResult] = useState<ScreenshotAnalysisResult | null>(null);
   const { toast } = useToast();
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-        toast({ variant: 'destructive', title: 'Invalid File', description: 'Please select an image file.' });
-        return;
-    }
-
+  const processImage = useCallback(async (file: File) => {
     setAnalyzing(true);
     setResult(null);
 
     try {
-        const reader = new FileReader();
-        reader.onloadend = async () => {
-            const dataUri = reader.result as string;
-            const analysis = await scanScreenshot(dataUri);
-            setResult(analysis);
-            setAnalyzing(false);
-        };
-        reader.readAsDataURL(file);
-    } catch (error) {
-        console.error(error);
-        toast({ variant: 'destructive', title: 'Analysis Failed', description: 'Could not process the image.' });
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const dataUri = reader.result as string;
+        const analysis = await scanScreenshot(dataUri);
+        setResult(analysis);
         setAnalyzing(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error(error);
+      toast({ 
+        variant: 'destructive', 
+        title: 'Analysis Failed', 
+        description: 'Could not process the image. Please try again.' 
+      });
+      setAnalyzing(false);
     }
+  }, [toast]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({ variant: 'destructive', title: 'Invalid File', description: 'Please select an image file.' });
+      return;
+    }
+
+    processImage(file);
   };
+
+  const handlePaste = useCallback((e: ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        if (file) {
+          processImage(file);
+          toast({
+            title: "Image Detected",
+            description: "Processing screenshot from clipboard...",
+          });
+          break;
+        }
+      }
+    }
+  }, [processImage, toast]);
+
+  useEffect(() => {
+    window.addEventListener('paste', handlePaste);
+    return () => window.removeEventListener('paste', handlePaste);
+  }, [handlePaste]);
 
   return (
     <div className="w-full max-w-3xl space-y-8 animate-in fade-in zoom-in-95">
@@ -54,16 +86,19 @@ export function ScreenshotScannerPage() {
                     <Camera className="text-primary w-8 h-8" />
                     Screenshot Scam Scanner
                 </CardTitle>
-                <CardDescription>Upload a screenshot of a suspicious message to detect fraud, scams, or phishing attempts.</CardDescription>
+                <CardDescription>Upload or <strong>Paste (Ctrl+V)</strong> a screenshot of a suspicious message to detect fraud or phishing.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-                <div className="flex flex-col items-center justify-center border-2 border-dashed border-border/50 rounded-xl p-8 bg-background/20">
+                <div className="flex flex-col items-center justify-center border-2 border-dashed border-border/50 rounded-xl p-8 bg-background/20 transition-colors hover:border-primary/40">
                     {result?.imageUrl ? (
                         <div className="relative w-full max-w-sm aspect-[9/16] mb-4 rounded-lg overflow-hidden border border-primary/20">
                             <Image src={result.imageUrl} alt="Screenshot for analysis" fill className="object-contain" />
                         </div>
                     ) : (
-                        <FileText className="w-16 h-16 text-muted-foreground mb-4" />
+                        <div className="flex flex-col items-center mb-4">
+                            <FileText className="w-16 h-16 text-muted-foreground mb-2" />
+                            <p className="text-sm text-muted-foreground font-medium italic">Ready for upload or paste</p>
+                        </div>
                     )}
                     <input
                         type="file"
@@ -73,12 +108,18 @@ export function ScreenshotScannerPage() {
                         onChange={handleFileChange}
                         disabled={analyzing}
                     />
-                    <Button asChild disabled={analyzing} className="cursor-target h-12 px-8 text-lg">
-                        <label htmlFor="screenshot-upload">
-                            {analyzing ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Camera className="mr-2 h-5 w-5" />}
-                            {analyzing ? 'Analyzing Message...' : 'Upload Screenshot'}
-                        </label>
-                    </Button>
+                    <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
+                        <Button asChild disabled={analyzing} className="cursor-target h-12 px-8 text-lg">
+                            <label htmlFor="screenshot-upload">
+                                {analyzing ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Camera className="mr-2 h-5 w-5" />}
+                                {analyzing ? 'Analyzing...' : 'Upload File'}
+                            </label>
+                        </Button>
+                        <div className="flex items-center justify-center gap-2 px-4 py-2 bg-primary/10 rounded-lg border border-primary/20">
+                            <Clipboard className="w-4 h-4 text-primary" />
+                            <span className="text-xs font-bold uppercase tracking-widest text-primary">Paste Image Enabled</span>
+                        </div>
+                    </div>
                 </div>
 
                 {result && (
