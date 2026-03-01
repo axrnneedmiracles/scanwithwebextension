@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { Mic, Square, ShieldAlert, ShieldCheck, Loader2, PhoneCall, AlertTriangle, FileText, Volume2 } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { Mic, Square, ShieldAlert, ShieldCheck, Loader2, PhoneCall, AlertTriangle, FileText, Volume2, Upload, Clipboard } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 import { Button } from '../ui/button';
 import { Progress } from '../ui/progress';
@@ -19,6 +19,7 @@ export function CallScannerPage() {
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const chunks = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -26,6 +27,60 @@ export function CallScannerPage() {
         if (timerRef.current) clearInterval(timerRef.current);
     };
   }, []);
+
+  const processAudio = useCallback(async (dataUri: string) => {
+    setAnalyzing(true);
+    setResult(null);
+    try {
+        const analysis = await scanCall(dataUri);
+        setResult(analysis);
+    } catch (error) {
+        toast({ variant: 'destructive', title: 'Analysis Failed', description: 'Could not process the audio.' });
+    } finally {
+        setAnalyzing(false);
+    }
+  }, [toast]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('audio/')) {
+        toast({ variant: 'destructive', title: 'Invalid File', description: 'Please select an audio file (MP3, WAV, etc.).' });
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+        processAudio(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handlePaste = useCallback((e: ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('audio') !== -1) {
+        const file = items[i].getAsFile();
+        if (file) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            processAudio(reader.result as string);
+            toast({ title: "Recording Detected", description: "Processing audio from clipboard..." });
+          };
+          reader.readAsDataURL(file);
+          break;
+        }
+      }
+    }
+  }, [processAudio, toast]);
+
+  useEffect(() => {
+    window.addEventListener('paste', handlePaste);
+    return () => window.removeEventListener('paste', handlePaste);
+  }, [handlePaste]);
 
   const startRecording = async () => {
     try {
@@ -71,19 +126,6 @@ export function CallScannerPage() {
     }
   };
 
-  const processAudio = async (dataUri: string) => {
-    setAnalyzing(true);
-    setResult(null);
-    try {
-        const analysis = await scanCall(dataUri);
-        setResult(analysis);
-    } catch (error) {
-        toast({ variant: 'destructive', title: 'Analysis Failed', description: 'Could not process the audio.' });
-    } finally {
-        setAnalyzing(false);
-    }
-  };
-
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -98,10 +140,12 @@ export function CallScannerPage() {
                     <PhoneCall className="text-primary w-8 h-8" />
                     On-Call Scam Detection
                 </CardTitle>
-                <CardDescription>Record a suspicious call or message. Our AI will transcribe and analyze it for social engineering and fraudulent requests.</CardDescription>
+                <CardDescription>
+                  Record, upload, or <strong>Paste (Ctrl+V)</strong> a suspicious call recording. Our AI will transcribe and analyze it for fraud.
+                </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-                <div className="flex flex-col items-center justify-center border-2 border-dashed border-border/50 rounded-xl p-12 bg-background/20">
+                <div className="flex flex-col items-center justify-center border-2 border-dashed border-border/50 rounded-xl p-12 bg-background/20 hover:border-primary/40 transition-colors">
                     <div className={`relative mb-8 flex items-center justify-center`}>
                          {isRecording && (
                             <div className="absolute inset-0 bg-destructive/20 rounded-full animate-ping" />
@@ -111,22 +155,35 @@ export function CallScannerPage() {
                          </div>
                     </div>
 
-                    <div className="text-center space-y-4">
+                    <div className="text-center space-y-4 w-full">
                         {isRecording ? (
                             <div className="space-y-2">
                                 <p className="text-2xl font-mono font-bold text-destructive">{formatTime(recordTime)}</p>
                                 <p className="text-sm text-muted-foreground">Recording... Say the suspicious part clearly.</p>
                             </div>
                         ) : (
-                             <p className="text-sm text-muted-foreground">Click below to start listening.</p>
+                             <p className="text-sm text-muted-foreground">Click to record, or paste an audio file.</p>
                         )}
                         
-                        <div className="flex justify-center gap-4">
+                        <div className="flex flex-col sm:flex-row justify-center gap-4">
                             {!isRecording ? (
-                                <Button onClick={startRecording} disabled={analyzing} className="h-14 px-8 text-lg cursor-target">
-                                    <Mic className="mr-2 h-5 w-5" />
-                                    Start Detection
-                                </Button>
+                                <>
+                                  <Button onClick={startRecording} disabled={analyzing} className="h-14 px-8 text-lg cursor-target">
+                                      <Mic className="mr-2 h-5 w-5" />
+                                      Record Live
+                                  </Button>
+                                  <input 
+                                    type="file" 
+                                    ref={fileInputRef} 
+                                    className="hidden" 
+                                    accept="audio/*" 
+                                    onChange={handleFileChange}
+                                  />
+                                  <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={analyzing} className="h-14 px-8 text-lg cursor-target bg-background/50">
+                                      <Upload className="mr-2 h-5 w-5" />
+                                      Upload File
+                                  </Button>
+                                </>
                             ) : (
                                 <Button onClick={stopRecording} variant="destructive" className="h-14 px-8 text-lg cursor-target">
                                     <Square className="mr-2 h-5 w-5" />
@@ -134,6 +191,13 @@ export function CallScannerPage() {
                                 </Button>
                             )}
                         </div>
+
+                        {!isRecording && !analyzing && (
+                          <div className="flex items-center justify-center gap-2 mt-4 text-xs font-bold uppercase tracking-widest text-primary opacity-60">
+                            <Clipboard className="w-4 h-4" />
+                            Paste Support Enabled
+                          </div>
+                        )}
                     </div>
                 </div>
 

@@ -22,7 +22,7 @@ const options = [
     id: 'call-scanner',
     icon: <PhoneCall className="text-primary w-6 h-6" />,
     title: 'On-Call Detection',
-    description: 'AI-powered scanning for suspicious call transcripts and voice phishing indicators.',
+    description: 'Record, upload, or paste suspicious call recordings for forensic transcription and fraud analysis.',
     status: 'Live',
     action: 'Open Scanner'
   },
